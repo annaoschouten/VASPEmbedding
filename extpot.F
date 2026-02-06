@@ -95,7 +95,7 @@
 ! In realmode, CVTOT allocated as complex array, but used as real grid
 !***********************************************************************
 
-    SUBROUTINE EXTPT_EXTERNAL_POT_ADD(GRIDC, LATT_CUR, CVTOT)
+    SUBROUTINE EXTPT_EXTERNAL_POT_ADD(GRIDC, LATT_CUR, WDES, CVTOT)
 
       USE prec
       USE base
@@ -113,9 +113,11 @@
       TYPE (latt)        LATT_CUR
       TYPE (wavedes)     WDES
       COMPLEX(q) ::      CVTOT(GRIDC%MPLWV, WDES%NCDIJ)    !Include spin index in the potential
+      integer ISP      !For including spin
 
-      call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVTOT(1))    !TODO: add spin dependence to CVTOT at this line
-
+    DO ISP=1,WDES%NCDIJ
+      call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVTOT(1,ISP))    !TODO: add spin dependence to CVTOT at this line
+    ENDDO
     end subroutine EXTPT_EXTERNAL_POT_ADD
 
     subroutine EXTPT_EXTERNAL_POT_ADD_PAW(POTAE, POT, NDIM, NCDIJ, LMMAX, NIP)
@@ -183,7 +185,7 @@
       integer, parameter :: nprint=8
       real(q) :: VLMK(KMAX), dV
       integer :: NXMAX, NYMAX, NZMAX, NG, ofile=666
-      integer :: NI, NDIM, NT, NIP, LMMAX, LYMAX, L, M, LM, K, RNMAX, NR
+      integer :: NI, NDIM, NT, NIP, LMMAX, LYMAX, L, M, LM, K, RNMAX, NR, ISP
       integer :: iprint, IRDMAX, INDMAX, IND
       integer, external :: MAXL_AUG, MAXL1
       RGRID, allocatable :: VLMFULL(:,:,:)      
@@ -197,7 +199,9 @@
 
       ! copy the external potential to CVEXT, change normal layout to VASP layout
       CVEXT = 0.0_q
-      call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVEXT(1))      !TODO:figure out adding the spin index
+      DO ISP=1,WDES%NCDIJ
+        call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVEXT(1,ISP))      !TODO:figure out adding the spin index
+      ENDDO
 
       ! set up the maximum radial grid dimension, copied from SET_DD_PAW
       NDIM=0
@@ -549,7 +553,7 @@
 !*********************** SUBROUTINE READ_ELEM **************************
 ! Wrappers to read elements from CVTOT
 !***********************************************************************
-    FUNCTION READ_ELEM(GRIDC, CVTOT, I, NCDIJ)    !Added spin index
+    FUNCTION READ_ELEM(GRIDC, WDES, CVTOT, I, NCDIJ)    !Added spin index
       USE prec
       USE base
       USE lattice
@@ -1121,7 +1125,7 @@ end module mextpot
 ! bifurcated from soubroutine EXTERNAL_POT in pot.F
 !
 !***********************************************************************
-    SUBROUTINE EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVTOT)
+    SUBROUTINE EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, WDES, CVTOT)
       USE prec
       USE base
       USE lattice
@@ -1179,7 +1183,7 @@ end module mextpot
 
     END SUBROUTINE EXTERNAL_POT_ADD_
 
-    SUBROUTINE READ_ELEM_(GRIDC, CVTOT, I, NCDIJ, RES)
+    SUBROUTINE READ_ELEM_(GRIDC, WDES, CVTOT, I, NCDIJ, RES)
       USE prec
       USE base
       USE lattice
@@ -1198,5 +1202,6 @@ end module mextpot
 
       RES = CVTOT(I, NCDIJ)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
