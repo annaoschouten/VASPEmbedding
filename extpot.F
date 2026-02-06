@@ -190,7 +190,7 @@
       integer, allocatable :: NLI(:)
       real(q),allocatable :: YLM(:,:), DIST(:), XS(:), YS(:), ZS(:)    
 
-      allocate(CVEXT(DIMREAL(GRIDC%MPLWV, WDES%NCDIJ)))      !Add a spin index
+      allocate(CVEXT(DIMREAL(GRIDC%MPLWV), WDES%NCDIJ))      !Add a spin index
       NXMAX = EXTPT%nx
       NYMAX = EXTPT%ny
       NZMAX = EXTPT%nz
@@ -1198,4 +1198,5 @@ end module mextpot
 
       RES = CVTOT(I, NCDIJ)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
