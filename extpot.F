@@ -82,7 +82,7 @@
          endif
          allocate(EXTPT_GRID(EXTPT%nx, EXTPT%ny, EXTPT%nz, WDES%NCDIJ))    !Add spin index to the external potential
          ! follow the tradition of CHGCAR format, ix be the fastest index
-         read(IU_POT,*) ((((EXTPT_GRID(ix,iy,iz), ix=1,EXTPT%nx), &
+         read(IU_POT,*) ((((EXTPT_GRID(ix,iy,iz,is), ix=1,EXTPT%nx), &
                                             iy=1,EXTPT%ny), iz=1,EXTPT%nz), is=1,WDES%NCDIJ)  !Include spin index for the external potential
          close(IU_POT)
       endif
@@ -1202,6 +1202,7 @@ end module mextpot
 
       RES = CVTOT(I, NCDIJ)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
