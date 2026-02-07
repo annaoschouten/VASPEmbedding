@@ -6,7 +6,6 @@
 
   module mextpot
     use prec
-    use wave      !Add the wavefunction information so that we can get the spin dependence
     implicit none
 
     type extpot
@@ -16,7 +15,6 @@
     endtype extpot
 
     type (extpot) EXTPT
-    type (wavedes) WDES    !Include the wavefunction information for the spin index
     RGRID, allocatable :: EXTPT_GRID(:,:,:,:) ! the external potential grid in normal layout !Add a spin index
     RGRID, allocatable :: VLM(:,:,:)        ! external potential for each channel of each ion
     RGRID, allocatable :: SCX(:), SCY(:), SCZ(:)
@@ -38,12 +36,14 @@
     end function EXTPT_DEXTPOT
 
     ! read INCAR FILE for external potential information
-    subroutine EXTPT_READER(NGXF,NGYF,NGZF,IU0,IU5,IU6)
+    subroutine EXTPT_READER(WDES, NGXF,NGYF,NGZF,IU0,IU5,IU6)
       use base
       use reader_tags
       use vaspxml
+      use wave
       implicit none
 
+      type (wavedes) WDES
       integer :: NGXF, NGYF, NGZF, IU0, IU5, IU6, IU_POT=99
       ! local variables
       integer :: ix, iy, iz, is, ntot
@@ -1202,6 +1202,7 @@ end module mextpot
 
       RES = CVTOT(I, NCDIJ)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
