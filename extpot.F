@@ -550,7 +550,7 @@
 !*********************** SUBROUTINE READ_ELEM **************************
 ! Wrappers to read elements from CVTOT
 !***********************************************************************
-    FUNCTION READ_ELEM(GRIDC, WDES, CVTOT, I, NCDIJ)    !Added spin index
+    FUNCTION READ_ELEM(GRIDC, CVTOT, I)   
       USE prec
       USE base
       USE lattice
@@ -558,16 +558,14 @@
       USE mgrid
       USE poscar
       USE constant
-      USE wave      !Add wave for spin information
       implicit none
 
       TYPE (grid_3d)     GRIDC
-      TYPE (wavedes)     WDES      !Add for spin
-      COMPLEX(q)         CVTOT(DIMREAL(GRIDC%MPLWV), WDES%NCDIJ)      !Add spin dependence
-      INTEGER :: I, NCDIJ        !Added spin index
+      COMPLEX(q)         CVTOT(DIMREAL(GRIDC%MPLWV))     
+      INTEGER :: I
       REAL(q) :: READ_ELEM
 
-      CALL READ_ELEM_(GRIDC, CVTOT, I, NCDIJ, READ_ELEM)        !Added spin index
+      CALL READ_ELEM_(GRIDC, CVTOT, I, READ_ELEM)       
       return
     END FUNCTION READ_ELEM
 
@@ -1175,7 +1173,7 @@ end module mextpot
 
     END SUBROUTINE EXTERNAL_POT_ADD_
 
-    SUBROUTINE READ_ELEM_(GRIDC, WDES, CVTOT, I, NCDIJ, RES)
+    SUBROUTINE READ_ELEM_(GRIDC, CVTOT, I, RES)
       USE prec
       USE base
       USE lattice
@@ -1183,17 +1181,16 @@ end module mextpot
       USE mgrid
       USE poscar
       USE constant
-      USE wave      !Added to use spin
       implicit none
 
       TYPE (grid_3d)     GRIDC
-      TYPE (wavedes)     WDES          !Added to use spin
-      RGRID              CVTOT(DIMREAL(GRIDC%MPLWV),WDES%NCDIJ)      !Change this to account for the spin channels
-      INTEGER :: I, NCDIJ        !Add spin index
+      RGRID              CVTOT(DIMREAL(GRIDC%MPLWV))    
+      INTEGER :: I
       REAL(q) :: RES
 
-      RES = CVTOT(I, NCDIJ)      !Add spin index
+      RES = CVTOT(I)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
