@@ -96,7 +96,7 @@
 ! For spin dependent, added loop over EXTPT_EXTERNAL_POT_ADD in pot.F
 !***********************************************************************
 
-    SUBROUTINE EXTPT_EXTERNAL_POT_ADD(GRIDC, LATT_CUR, WDES, CVTOT)
+    SUBROUTINE EXTPT_EXTERNAL_POT_ADD(GRIDC, LATT_CUR, CVTOT)
 
       USE prec
       USE base
@@ -112,11 +112,9 @@
 
       TYPE (grid_3d)     GRIDC
       TYPE (latt)        LATT_CUR
-      TYPE (wavedes)     WDES
-      COMPLEX(q) ::      CVTOT(GRIDC%MPLWV, WDES%NCDIJ)    !Include spin index in the potential
-      integer NCDIJ      !For including spin
+      COMPLEX(q) ::      CVTOT(GRIDC%MPLWV)    !Include spin index in the potential
 
-      call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, WDES, CVTOT(1,NCDIJ))    !TODO: add spin dependence to CVTOT at this line
+      call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, WDES, CVTOT(1))    !TODO: add spin dependence to CVTOT at this line
     end subroutine EXTPT_EXTERNAL_POT_ADD
 
     subroutine EXTPT_EXTERNAL_POT_ADD_PAW(POTAE, POT, NDIM, NCDIJ, LMMAX, NIP)
@@ -1121,9 +1119,9 @@ end module mextpot
 ! this subroutine can be used to add an external potential
 ! the units of the potential are eV
 ! bifurcated from soubroutine EXTERNAL_POT in pot.F
-!
+! Loop over spin in pot.F
 !***********************************************************************
-    SUBROUTINE EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, WDES, CVTOT)
+    SUBROUTINE EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVTOT)
       USE prec
       USE base
       USE lattice
@@ -1132,15 +1130,13 @@ end module mextpot
       USE poscar
       USE constant
       USE mextpot
-      USE wave      !Added to use spin
       IMPLICIT COMPLEX(q) (C)
       IMPLICIT REAL(q) (A-B,D-H,O-Z)
 
       TYPE (grid_3d)     GRIDC
       TYPE (latt)        LATT_CUR
-      TYPE (wavedes)     WDES                                !Added for spin
-      RGRID      CVTOT(DIMREAL(GRIDC%MPLWV),WDES%NCDIJ)      !Changed to account for the spin components
-      INTEGER :: NG, N1, N2, N3, N1MAX, N2MAX, N3MAX, NC, NCDIJ
+      RGRID      CVTOT(DIMREAL(GRIDC%MPLWV))      
+      INTEGER :: NG, N1, N2, N3, N1MAX, N2MAX, N3MAX, NC
 
       NG=0
 
@@ -1156,7 +1152,7 @@ end module mextpot
             N3= GRIDC%RL%I3(NC)
             DO N1=1,GRIDC%RL%NROW
                NG=NG+1
-               CVTOT(NG,NCDIJ)=CVTOT(NG,NCDIJ) + EXTPT_GRID(N2,N3,N1,NCDIJ)      !Added spin index
+               CVTOT(NG)=CVTOT(NG) + EXTPT_GRID(N2,N3,N1)      !Added spin index
             ENDDO
          ENDDO
       ELSE
@@ -1170,7 +1166,7 @@ end module mextpot
             N3= GRIDC%RL%I3(NC)
             DO N1=1,GRIDC%RL%NROW
                NG=NG+1
-               CVTOT(NG,NCDIJ)=CVTOT(NG,NCDIJ) + EXTPT_GRID(N1,N2,N3,NCDIJ)       !Added spin index
+               CVTOT(NG)=CVTOT(NG) + EXTPT_GRID(N1,N2,N3)       !Added spin index
             ENDDO
          ENDDO
       ENDIF
@@ -1196,6 +1192,7 @@ end module mextpot
 
       RES = CVTOT(I, NCDIJ)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
