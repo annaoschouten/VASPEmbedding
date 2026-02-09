@@ -36,7 +36,7 @@
     end function EXTPT_DEXTPOT
 
     ! read INCAR FILE for external potential information
-    subroutine EXTPT_READER(WDES, NGXF,NGYF,NGZF,IU0,IU5,IU6)
+    subroutine EXTPT_READER(WDES, NGXF,NGYF,NGZF,IU0,IU5,IU6)    !added WDES in main.F
       use base
       use reader_tags
       use vaspxml
@@ -93,6 +93,7 @@
 !******************** SUBROUTINE EXTERNAL_POT_ADD **********************
 ! A wrapper deal with the wierd variable type compatibility issue...
 ! In realmode, CVTOT allocated as complex array, but used as real grid
+! For spin dependent, added loop over EXTPT_EXTERNAL_POT_ADD in pot.F
 !***********************************************************************
 
     SUBROUTINE EXTPT_EXTERNAL_POT_ADD(GRIDC, LATT_CUR, WDES, CVTOT)
@@ -150,9 +151,10 @@
 !*********************** SUBROUTINE CALC_VLM ***************************
 ! This subroutine calculates the LM component of the external potential
 ! This code was written assuming realmode and NGZhalf = .True.
+! For spin dependent, added loop over this for each spin in main.F
 !***********************************************************************
 
-    SUBROUTINE EXTPT_CALC_VLM(LATT_CUR, GRIDC, T_INFO, P, LMDIM, WDES, IU0)
+    SUBROUTINE EXTPT_CALC_VLM(LATT_CUR, GRIDC, T_INFO, P, LMDIM, WDES, IU0, NCDIJ)
 
       use prec
       use base
@@ -173,7 +175,7 @@
       type (type_info)  T_INFO
       type (potcar),TARGET::  P(T_INFO%NTYP)
       type (wavedes)    WDES
-      integer :: LMDIM, IU0
+      integer :: LMDIM, IU0, NCDIJ !Added NCDIJ as spin index
       ! local variables
       type (potcar),POINTER:: PP
       complex(q) :: PHASE
@@ -183,7 +185,7 @@
       integer, parameter :: nprint=8
       real(q) :: VLMK(KMAX), dV
       integer :: NXMAX, NYMAX, NZMAX, NG, ofile=666
-      integer :: NI, NDIM, NT, NIP, LMMAX, LYMAX, L, M, LM, K, RNMAX, NR, ISP
+      integer :: NI, NDIM, NT, NIP, LMMAX, LYMAX, L, M, LM, K, RNMAX, NR
       integer :: iprint, IRDMAX, INDMAX, IND
       integer, external :: MAXL_AUG, MAXL1
       RGRID, allocatable :: VLMFULL(:,:,:)      
@@ -197,9 +199,7 @@
 
       ! copy the external potential to CVEXT, change normal layout to VASP layout
       CVEXT = 0.0_q
-      DO ISP=1,WDES%NCDIJ
-        call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVEXT(1,ISP))      !TODO:figure out adding the spin index
-      ENDDO
+      call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, WDES, CVEXT(1,NCDIJ))      !TODO:figure out adding the spin index
 
       ! set up the maximum radial grid dimension, copied from SET_DD_PAW
       NDIM=0
@@ -1196,6 +1196,7 @@ end module mextpot
 
       RES = CVTOT(I, NCDIJ)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
