@@ -113,11 +113,9 @@
       TYPE (latt)        LATT_CUR
       TYPE (wavedes)     WDES
       COMPLEX(q) ::      CVTOT(GRIDC%MPLWV, WDES%NCDIJ)    !Include spin index in the potential
-      integer ISP      !For including spin
+      integer NCDIJ      !For including spin
 
-    DO ISP=1,WDES%NCDIJ
-      call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVTOT(1,ISP))    !TODO: add spin dependence to CVTOT at this line
-    ENDDO
+      call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, WDES, CVTOT(1,NCDIJ))    !TODO: add spin dependence to CVTOT at this line
     end subroutine EXTPT_EXTERNAL_POT_ADD
 
     subroutine EXTPT_EXTERNAL_POT_ADD_PAW(POTAE, POT, NDIM, NCDIJ, LMMAX, NIP)
@@ -1142,7 +1140,7 @@ end module mextpot
       TYPE (latt)        LATT_CUR
       TYPE (wavedes)     WDES                                !Added for spin
       RGRID      CVTOT(DIMREAL(GRIDC%MPLWV),WDES%NCDIJ)      !Changed to account for the spin components
-      INTEGER :: NG, N1, N2, N3, N1MAX, N2MAX, N3MAX, NC
+      INTEGER :: NG, N1, N2, N3, N1MAX, N2MAX, N3MAX, NC, NCDIJ
 
       NG=0
 
@@ -1153,32 +1151,28 @@ end module mextpot
          N3MAX=GRIDC%NGY
          N1MAX=GRIDC%NGZ
 
-        DO ISP=1,WDES%NCDIJ          !Adding loop for spin component
          DO NC=1,GRIDC%RL%NCOL
             N2= GRIDC%RL%I2(NC)
             N3= GRIDC%RL%I3(NC)
             DO N1=1,GRIDC%RL%NROW
                NG=NG+1
-               CVTOT(NG,ISP)=CVTOT(NG,ISP) + EXTPT_GRID(N2,N3,N1,ISP)      !Added spin index
+               CVTOT(NG,NCDIJ)=CVTOT(NG,NCDIJ) + EXTPT_GRID(N2,N3,N1,NCDIJ)      !Added spin index
             ENDDO
          ENDDO
-        ENDDO
       ELSE
          ! conventional version: x-> N1, y-> N2, z-> N3
          N1MAX=GRIDC%NGX
          N2MAX=GRIDC%NGY
          N3MAX=GRIDC%NGZ
 
-        DO ISP=1,WDES%NCDIJ        !Adding loop for spin component
          DO NC=1,GRIDC%RL%NCOL
             N2= GRIDC%RL%I2(NC)
             N3= GRIDC%RL%I3(NC)
             DO N1=1,GRIDC%RL%NROW
                NG=NG+1
-               CVTOT(NG,ISP)=CVTOT(NG,ISP) + EXTPT_GRID(N1,N2,N3,ISP)       !Added spin index
+               CVTOT(NG,NCDIJ)=CVTOT(NG,NCDIJ) + EXTPT_GRID(N1,N2,N3,NCDIJ)       !Added spin index
             ENDDO
          ENDDO
-        ENDDO
       ENDIF
 
     END SUBROUTINE EXTERNAL_POT_ADD_
@@ -1202,6 +1196,7 @@ end module mextpot
 
       RES = CVTOT(I, NCDIJ)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
