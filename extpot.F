@@ -178,7 +178,7 @@
       ! local variables
       type (potcar),POINTER:: PP
       complex(q) :: PHASE
-      real(q), allocatable :: CVEXT(:,:)    !Add a spin index
+      real(q), allocatable :: CVEXT(:)    !Add a spin index
       real(q) :: RCUT, R, RI(3),RVEC(3)
       real(q) :: CTMP, RMAX, RSWITCH, val, RPREV, CTMPPREV
       integer, parameter :: nprint=8
@@ -1194,6 +1194,7 @@ end module mextpot
 
       RES = CVTOT(I, NCDIJ)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
