@@ -96,7 +96,7 @@
 ! For spin dependent, added loop over EXTPT_EXTERNAL_POT_ADD in pot.F
 !***********************************************************************
 
-    SUBROUTINE EXTPT_EXTERNAL_POT_ADD(GRIDC, LATT_CUR, CVTOT, NCDIJ)
+    SUBROUTINE EXTPT_EXTERNAL_POT_ADD(GRIDC, LATT_CUR, WDES, CVTOT, NCDIJ)
 
       USE prec
       USE base
@@ -112,10 +112,11 @@
 
       TYPE (grid_3d)     GRIDC
       TYPE (latt)        LATT_CUR
-      COMPLEX(q) ::      CVTOT(GRIDC%MPLWV)    !Include spin index in the potential
+      TYPE (wavedes)     WDES
+      COMPLEX(q) ::      CVTOT(GRIDC%MPLWV, WDES%NCDIJ)    !Include spin index in the potential
       INTEGER NCDIJ
 
-      call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVTOT(1), NCDIJ)    !added spin index
+      call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, WDES, CVTOT(1, NCDIJ), NCDIJ)    !added spin index
     end subroutine EXTPT_EXTERNAL_POT_ADD
 
     subroutine EXTPT_EXTERNAL_POT_ADD_PAW(POTAE, POT, NDIM, NCDIJ, LMMAX, NIP)
@@ -178,7 +179,7 @@
       ! local variables
       type (potcar),POINTER:: PP
       complex(q) :: PHASE
-      real(q), allocatable :: CVEXT(:)    !Add a spin index
+      real(q), allocatable :: CVEXT(:,:)    !Add a spin index
       real(q) :: RCUT, R, RI(3),RVEC(3)
       real(q) :: CTMP, RMAX, RSWITCH, val, RPREV, CTMPPREV
       integer, parameter :: nprint=8
@@ -191,14 +192,14 @@
       integer, allocatable :: NLI(:)
       real(q),allocatable :: YLM(:,:), DIST(:), XS(:), YS(:), ZS(:)    
 
-      allocate(CVEXT(DIMREAL(GRIDC%MPLWV)))      !Add a spin index
+      allocate(CVEXT(DIMREAL(GRIDC%MPLWV), WDES%NCDIJ))      !Add a spin index
       NXMAX = EXTPT%nx
       NYMAX = EXTPT%ny
       NZMAX = EXTPT%nz
 
       ! copy the external potential to CVEXT, change normal layout to VASP layout
       CVEXT = 0.0_q
-      call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVEXT(1), NCDIJ)      !added spin index
+      call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, WDES, CVEXT(1,NCDIJ), NCDIJ)      !added spin index
 
       ! set up the maximum radial grid dimension, copied from SET_DD_PAW
       NDIM=0
@@ -550,7 +551,7 @@
 !*********************** SUBROUTINE READ_ELEM **************************
 ! Wrappers to read elements from CVTOT
 !***********************************************************************
-    FUNCTION READ_ELEM(GRIDC, CVTOT, I)   
+    FUNCTION READ_ELEM(GRIDC, WDES, CVTOT, I, NCDIJ)   
       USE prec
       USE base
       USE lattice
@@ -558,14 +559,16 @@
       USE mgrid
       USE poscar
       USE constant
+      USE wave
       implicit none
 
       TYPE (grid_3d)     GRIDC
-      COMPLEX(q)         CVTOT(DIMREAL(GRIDC%MPLWV))     
-      INTEGER :: I
+      TYPE (wavedes)     WDES
+      COMPLEX(q)         CVTOT(DIMREAL(GRIDC%MPLWV), WDES%NCDIJ)     
+      INTEGER :: I, NCDIJ
       REAL(q) :: READ_ELEM
 
-      CALL READ_ELEM_(GRIDC, CVTOT, I, READ_ELEM)       
+      CALL READ_ELEM_(GRIDC, WDES, CVTOT, I, NCDJI, READ_ELEM)       
       return
     END FUNCTION READ_ELEM
 
@@ -1120,7 +1123,7 @@ end module mextpot
 ! bifurcated from soubroutine EXTERNAL_POT in pot.F
 ! Loop over spin in pot.F
 !***********************************************************************
-    SUBROUTINE EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVTOT, NCDIJ)
+    SUBROUTINE EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, WDES, CVTOT, NCDIJ)
       USE prec
       USE base
       USE lattice
@@ -1129,12 +1132,14 @@ end module mextpot
       USE poscar
       USE constant
       USE mextpot
+      USE wave
       IMPLICIT COMPLEX(q) (C)
       IMPLICIT REAL(q) (A-B,D-H,O-Z)
 
       TYPE (grid_3d)     GRIDC
       TYPE (latt)        LATT_CUR
-      RGRID      CVTOT(DIMREAL(GRIDC%MPLWV))
+      TYPE (wavedes)     WDES
+      RGRID      CVTOT(DIMREAL(GRIDC%MPLWV), WDES%NCDIJ)
       INTEGER    NCDIJ                      !Spin index
       INTEGER :: NG, N1, N2, N3, N1MAX, N2MAX, N3MAX, NC
 
@@ -1152,7 +1157,7 @@ end module mextpot
             N3= GRIDC%RL%I3(NC)
             DO N1=1,GRIDC%RL%NROW
                NG=NG+1
-               CVTOT(NG)=CVTOT(NG) + EXTPT_GRID(N2,N3,N1, NCDIJ)      !Added spin index
+               CVTOT(NG,NCDIJ)=CVTOT(NG,NCDIJ) + EXTPT_GRID(N2,N3,N1, NCDIJ)      !Added spin index
             ENDDO
          ENDDO
       ELSE
@@ -1166,14 +1171,14 @@ end module mextpot
             N3= GRIDC%RL%I3(NC)
             DO N1=1,GRIDC%RL%NROW
                NG=NG+1
-               CVTOT(NG)=CVTOT(NG) + EXTPT_GRID(N1,N2,N3, NCDIJ)       !Added spin index
+               CVTOT(NG,NCDIJ)=CVTOT(NG,NCDIJ) + EXTPT_GRID(N1,N2,N3, NCDIJ)       !Added spin index
             ENDDO
          ENDDO
       ENDIF
 
     END SUBROUTINE EXTERNAL_POT_ADD_
 
-    SUBROUTINE READ_ELEM_(GRIDC, CVTOT, I, RES)
+    SUBROUTINE READ_ELEM_(GRIDC, WDES, CVTOT, I, NCDIJ, RES)
       USE prec
       USE base
       USE lattice
@@ -1181,15 +1186,18 @@ end module mextpot
       USE mgrid
       USE poscar
       USE constant
+      USE wave
       implicit none
 
       TYPE (grid_3d)     GRIDC
-      RGRID              CVTOT(DIMREAL(GRIDC%MPLWV))    
-      INTEGER :: I
+      TYPE (wavedes)     WDES
+      RGRID              CVTOT(DIMREAL(GRIDC%MPLWV),WDES%NCDIJ)    
+      INTEGER :: I, NCDIJ
       REAL(q) :: RES
 
-      RES = CVTOT(I)      !Add spin index
+      RES = CVTOT(I, NCDIJ)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
