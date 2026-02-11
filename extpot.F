@@ -223,8 +223,8 @@
       call CALC_Sdelta_COEFF(NXMAX, SCX, di_smear)
       call CALC_Sdelta_COEFF(NYMAX, SCY, di_smear)
       call CALC_Sdelta_COEFF(NZMAX, SCZ, di_smear)
-      call BSPLINE_INTERPOLATE_COEFF( EXTPT_GRID, SGRID, NXMAX, NYMAX, NZMAX, di_smear, &
-                                        SCX, SCY, SCZ, GRIDC )
+      call BSPLINE_INTERPOLATE_COEFF( EXTPT_GRID(:,:,:,NCDIJ), SGRID, NXMAX, NYMAX, NZMAX, di_smear, &
+                                        SCX, SCY, SCZ, GRIDC )                                    !Added the spin index to EXTPT_GRID here
 
       ! allocate temporary arrays
 #ifdef MPI
@@ -1190,6 +1190,7 @@ end module mextpot
 
       RES = CVTOT(I)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
