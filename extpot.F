@@ -153,7 +153,7 @@
 ! For spin dependent, added loop over this for each spin in main.F
 !***********************************************************************
 
-    SUBROUTINE EXTPT_CALC_VLM(LATT_CUR, GRIDC, T_INFO, P, LMDIM, WDES, IU0, NCDIJ)
+    SUBROUTINE EXTPT_CALC_VLM(LATT_CUR, GRIDC, T_INFO, P, LMDIM, WDES, IU0, NCDIJ, IU1)
 
       use prec
       use base
@@ -174,7 +174,7 @@
       type (type_info)  T_INFO
       type (potcar),TARGET::  P(T_INFO%NTYP)
       type (wavedes)    WDES
-      integer :: LMDIM, IU0, NCDIJ !Added NCDIJ as spin index
+      integer :: LMDIM, IU0, NCDIJ, IU1 !Added NCDIJ as spin index
       ! local variables
       type (potcar),POINTER:: PP
       complex(q) :: PHASE
@@ -199,6 +199,7 @@
       ! copy the external potential to CVEXT, change normal layout to VASP layout
       CVEXT = 0.0_q
       call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVEXT(1), NCDIJ)      !added spin index
+      write(IU1,*) 'External Potential copied succesfully'
 
       ! set up the maximum radial grid dimension, copied from SET_DD_PAW
       NDIM=0
@@ -1190,6 +1191,7 @@ end module mextpot
 
       RES = CVTOT(I)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
