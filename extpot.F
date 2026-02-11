@@ -568,7 +568,7 @@
       INTEGER :: I, NCDIJ
       REAL(q) :: READ_ELEM
 
-      CALL READ_ELEM_(GRIDC, WDES, CVTOT, I, NCDJI, READ_ELEM)       
+      CALL READ_ELEM_(GRIDC, WDES, CVTOT, I, NCDIJ, READ_ELEM)       
       return
     END FUNCTION READ_ELEM
 
@@ -1197,6 +1197,7 @@ end module mextpot
 
       RES = CVTOT(I, NCDIJ)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
