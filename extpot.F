@@ -149,7 +149,6 @@
 !*********************** SUBROUTINE CALC_VLM ***************************
 ! This subroutine calculates the LM component of the external potential
 ! This code was written assuming realmode and NGZhalf = .True.
-! For spin dependent, added loop over this for each spin in main.F
 !***********************************************************************
 
     SUBROUTINE EXTPT_CALC_VLM(LATT_CUR, GRIDC, T_INFO, P, LMDIM, WDES, IU0)
@@ -183,7 +182,7 @@
       integer, parameter :: nprint=8
       real(q) :: VLMK(KMAX), dV
       integer :: NXMAX, NYMAX, NZMAX, NG, ofile=666
-      integer :: NI, NDIM, NT, NIP, LMMAX, LYMAX, L, M, LM, K, RNMAX, NR
+      integer :: NI, NDIM, NT, NIP, LMMAX, LYMAX, L, M, LM, K, RNMAX, NR, ISP
       integer :: iprint, IRDMAX, INDMAX, IND
       integer, external :: MAXL_AUG, MAXL1
       RGRID, allocatable :: VLMFULL(:,:,:,:)    !Add a spin index
@@ -1194,6 +1193,7 @@ end module mextpot
 
       RES = CVTOT(I)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
