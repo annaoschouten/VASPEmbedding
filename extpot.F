@@ -96,7 +96,7 @@
 ! For spin dependent, added loop over EXTPT_EXTERNAL_POT_ADD in pot.F
 !***********************************************************************
 
-    SUBROUTINE EXTPT_EXTERNAL_POT_ADD(GRIDC, LATT_CUR, CVTOT, NCDIJ)
+    SUBROUTINE EXTPT_EXTERNAL_POT_ADD(GRIDC, LATT_CUR, CVTOT, NCDIJ, IU0)
 
       USE prec
       USE base
@@ -112,12 +112,13 @@
       TYPE (grid_3d)     GRIDC
       TYPE (latt)        LATT_CUR
       COMPLEX(q) ::      CVTOT(GRIDC%MPLWV)    !Include spin index in the potential
-      INTEGER NCDIJ
+      INTEGER NCDIJ, IU0
 
       call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVTOT(1), NCDIJ)    !added spin index
+      write(IU0,*) 'Added external potential'
     end subroutine EXTPT_EXTERNAL_POT_ADD
 
-    subroutine EXTPT_EXTERNAL_POT_ADD_PAW(POTAE, POT, NDIM, NCDIJ, LMMAX, NIP)
+    subroutine EXTPT_EXTERNAL_POT_ADD_PAW(POTAE, POT, NDIM, NCDIJ, LMMAX, NIP, IU0)
 
       USE prec
       USE base
@@ -128,7 +129,7 @@
       USE constant
       implicit none
 
-      INTEGER             NDIM, NCDIJ, LMMAX, NIP
+      INTEGER             NDIM, NCDIJ, LMMAX, NIP, IU0
       REAL(q) POT(:,:,:), POTAE(:,:,:)
 
       integer ISP, LM, II
@@ -141,7 +142,7 @@
             enddo
          enddo
       enddo
-
+      write(IU0,*) 'Added EXTPT to PAW'
     end subroutine EXTPT_EXTERNAL_POT_ADD_PAW
 
 
@@ -309,6 +310,7 @@
          enddo
       enddo ion2
       CALLMPI( M_sum_d(WDES%COMM_INTER, VLM, NDIM*LMMAX*WDES%NIONS*WDES%NCDIJ) )      !Add spin
+      deallocate(SGRID,SCX,SCY,SCZ,YLM,DIST,XS,YS,ZS)
     ENDDO                                                                             !End spin loop
 
       ! test print
@@ -1193,6 +1195,7 @@ end module mextpot
 
       RES = CVTOT(I)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
