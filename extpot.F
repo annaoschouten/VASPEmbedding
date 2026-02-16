@@ -143,6 +143,7 @@
             enddo
          enddo
       enddo
+      write(6,*) 'PAW value:', POT(II,LM,ISP)
       write(6,*) 'Added EXTPT to PAW'
     end subroutine EXTPT_EXTERNAL_POT_ADD_PAW
 
@@ -1175,6 +1176,7 @@ end module mextpot
                CVTOT(NG)=CVTOT(NG) + EXTPT_GRID(N1,N2,N3, NCDIJ)       !Added spin index
             ENDDO
          ENDDO
+        write(6,*) 'CVTOT final value:', CVTOT(NG)
       ENDIF
 
     END SUBROUTINE EXTERNAL_POT_ADD_
@@ -1196,6 +1198,7 @@ end module mextpot
 
       RES = CVTOT(I)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
