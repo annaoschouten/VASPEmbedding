@@ -134,7 +134,7 @@
       REAL(q) POT(:,:,:), POTAE(:,:,:)
 
       integer ISP, LM, II
-     write(6, *) 'Begin adding EXTPT to PAW'
+     !write(6, *) 'Begin adding EXTPT to PAW'
       do ISP = 1, NCDIJ
          do LM = 1, LMMAX
             do II = 1, NDIM
@@ -143,8 +143,8 @@
             enddo
          enddo
       enddo
-      write(6,*) 'PAW value:', POT(II,LM,ISP)
-      write(6,*) 'Added EXTPT to PAW'
+      !write(6,*) 'PAW value:', POT(II,LM,ISP)
+      !write(6,*) 'Added EXTPT to PAW'
     end subroutine EXTPT_EXTERNAL_POT_ADD_PAW
 
 
@@ -1148,6 +1148,7 @@ end module mextpot
       NG=0
 
 ! by kuang
+      write(6,*) 'Calling EXTERNAL_POT_ADD_'
       IF (GRIDC%RL%NFAST==3) THEN
          ! mpi version: x-> N2, y-> N3, z-> N1
          N2MAX=GRIDC%NGX
@@ -1176,8 +1177,8 @@ end module mextpot
                CVTOT(NG)=CVTOT(NG) + EXTPT_GRID(N1,N2,N3, NCDIJ)       !Added spin index
             ENDDO
          ENDDO
-        write(6,*) 'CVTOT final value:', CVTOT(NG)
       ENDIF
+      write(6,*) 'CVTOT final value:', CVTOT(NG)
 
     END SUBROUTINE EXTERNAL_POT_ADD_
 
@@ -1198,6 +1199,7 @@ end module mextpot
 
       RES = CVTOT(I)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
