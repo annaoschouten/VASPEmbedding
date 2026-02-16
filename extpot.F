@@ -115,7 +115,7 @@
       INTEGER NCDIJ, IU0
 
       call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVTOT(1), NCDIJ)    !added spin index
-      write(IU0,*) 'Added external potential'
+      write(IU0,'(A)') 'Added external potential'
     end subroutine EXTPT_EXTERNAL_POT_ADD
 
     subroutine EXTPT_EXTERNAL_POT_ADD_PAW(POTAE, POT, NDIM, NCDIJ, LMMAX, NIP, IU0)
@@ -142,7 +142,7 @@
             enddo
          enddo
       enddo
-      write(IU0,*) 'Added EXTPT to PAW'
+      write(IU0,'(A)') 'Added EXTPT to PAW'
     end subroutine EXTPT_EXTERNAL_POT_ADD_PAW
 
 
@@ -1195,6 +1195,7 @@ end module mextpot
 
       RES = CVTOT(I)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
