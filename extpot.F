@@ -96,7 +96,7 @@
 ! For spin dependent, added loop over EXTPT_EXTERNAL_POT_ADD in pot.F
 !***********************************************************************
 
-    SUBROUTINE EXTPT_EXTERNAL_POT_ADD(GRIDC, LATT_CUR, CVTOT, NCDIJ, IU0, IU1)
+    SUBROUTINE EXTPT_EXTERNAL_POT_ADD(GRIDC, LATT_CUR, CVTOT, NCDIJ, IU6)
 
       USE prec
       USE base
@@ -112,14 +112,14 @@
       TYPE (grid_3d)     GRIDC
       TYPE (latt)        LATT_CUR
       COMPLEX(q) ::      CVTOT(GRIDC%MPLWV)    !Include spin index in the potential
-      INTEGER NCDIJ, IU0, IU1
+      INTEGER NCDIJ, IU6
 
-      write(IU0, '(A)') 'Begin adding external potential'
+      write(IU6, '(A)') 'Begin adding external potential'
       call EXTERNAL_POT_ADD_(GRIDC, LATT_CUR, CVTOT(1), NCDIJ)    !added spin index
-      write(IU1,'(A)') 'Added external potential'
+      write(IU6,'(A)') 'Added external potential'
     end subroutine EXTPT_EXTERNAL_POT_ADD
 
-    subroutine EXTPT_EXTERNAL_POT_ADD_PAW(POTAE, POT, NDIM, NCDIJ, LMMAX, NIP, IU0, IU1)
+    subroutine EXTPT_EXTERNAL_POT_ADD_PAW(POTAE, POT, NDIM, NCDIJ, LMMAX, NIP, IU6)
 
       USE prec
       USE base
@@ -130,11 +130,11 @@
       USE constant
       implicit none
 
-      INTEGER             NDIM, NCDIJ, LMMAX, NIP, IU0, IU1
+      INTEGER             NDIM, NCDIJ, LMMAX, NIP, IU6
       REAL(q) POT(:,:,:), POTAE(:,:,:)
 
       integer ISP, LM, II
-     write(IU0, '(A)') 'Begin adding EXTPT to PAW'
+     write(IU6, '(A)') 'Begin adding EXTPT to PAW'
       do ISP = 1, NCDIJ
          do LM = 1, LMMAX
             do II = 1, NDIM
@@ -143,7 +143,7 @@
             enddo
          enddo
       enddo
-      write(IU1,'(A)') 'Added EXTPT to PAW'
+      write(IU6,'(A)') 'Added EXTPT to PAW'
     end subroutine EXTPT_EXTERNAL_POT_ADD_PAW
 
 
@@ -1196,6 +1196,7 @@ end module mextpot
 
       RES = CVTOT(I)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
