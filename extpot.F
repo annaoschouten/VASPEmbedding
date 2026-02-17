@@ -85,6 +85,8 @@
          read(IU_POT,*) ((((EXTPT_GRID(ix,iy,iz,is), ix=1,EXTPT%nx), &
                                             iy=1,EXTPT%ny), iz=1,EXTPT%nz), is=1,WDES%NCDIJ)  !Include spin index for the external potential
          close(IU_POT)
+          write(6,*) 'EXTPT spin 1', EXTPT_GRID(EXTPT%nx, EXTPT%ny, EXTPT%nz,1)
+          write(6,*) 'EXTPT spin 2', EXTPT_GRID(EXTPT%nx, EXTPT%ny, EXTPT%nz,2)
       endif
 
       return
@@ -1199,6 +1201,7 @@ end module mextpot
 
       RES = CVTOT(I)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
