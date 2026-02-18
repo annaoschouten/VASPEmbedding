@@ -781,6 +781,7 @@
          ! YLM(hat(r)), hence no need to use SETYLM_AUG
          ! In this version, we parallelize over local fine grid, so for each node,
          ! should have a complete grid point list, rather than local list
+        write(*,*) 'Beginning SETRN'
          CALL SETRN(GRIDC,LATT_CUR,RI,P(NT)%PSDMAX*EXTPT%FCORR,NPSRNL,&
                IRDMAX,INDMAX, 0.0,0.0,0.0,DIST(1),NLI(1),XS,YS,ZS,LLOCAL)
          rn_loop: do IND = 1, INDMAX
@@ -788,6 +789,7 @@
 #ifdef MPI
             if ( mod(IND,GRIDC%COMM%NCPU)+1 /= ICPU ) goto 321 ! if not local grid point, skip
 #endif
+            write(*,*) 'Begin calculating SGRID'
             SGRID = 0.0_q
             if ( .not. LINFO ) then
               RVEC(1) = XS(IND)*DIST(IND) ! in angstrom
@@ -815,6 +817,7 @@
             endif
 
             ! four DO loops over all the channels: l, m, lp, mp
+            write(*,*) 'Begin loops over channels'
             LM = 1
             l_loop:  DO L =1,P(NT)%LMAX
             LMP=LM
@@ -822,16 +825,20 @@
 
             if ( .not. LINFO ) then
               ! setup QIJ
+              write(*,*) 'Call SETQIJ'
               call SETQIJ(GRIDC, L,LP,P(NT),QIJ, NDIM)
             endif
             ! Electron density scaled by occupation number
+            write(*,*) 'Scale electron density'
             LL =P(NT)%LPS(L )
             LLP=P(NT)%LPS(LP)
             if ( .not. LINFO ) then
               ! setup the YLM3 lookup index
+              write(*,*) 'Call YLM3LOOKUP'
               CALL YLM3LOOKUP(LL,LLP,LMINDX)
             endif
 
+            write(*,*) 'Begin m_loop'
             m_loop:  DO M=1,2*LL+1
             MPLOW=1
             IF (L==LP) MPLOW=M
@@ -855,6 +862,7 @@
                !*****************************
                ! read STMP3 from DERINFO
                !*****************************
+               write(*,*) 'Reading STMP3'
                read(ofile,'(I4,I12,4I4,E25.10)') NIP,IGRID,LT,MT,LPT,MPT,STMP3
                ! check consistency
                if (NIP/=NI .or. IGRID/=ABS(LLOCAL(IND)) .or. LT/=L .or. MT/=M &
@@ -866,6 +874,7 @@
                !*****************************
                ! compute and write DERINFO
                !*****************************
+               write(*,*) 'Beginning compute and write DERINFO'
                DO  IC=ISTART,IEND-1
                   JLL = JL(IC)
                   JLM = JS(IC)
@@ -887,6 +896,7 @@
                            abs(DRVEC(3)*NZMAX)<di_smear+1) then
                           RVECF(:) = RVECF(:) + RI(:) ! grid coordinate in direct
                           val = bspline( RVECF, SGRID, NXMAX, NYMAX, NZMAX )
+                          write(*,*) 'Calculate VLMK'
                           VLMK(K) = VLMK(K) + dV* FSWITCH(R,RMAX,Delta)* &
                             &  YLMF(INDF,JLM)*RK(R,K,RCUT)*val
                         endif
@@ -894,6 +904,7 @@
                     enddo
                   enddo
                   ! loop over r
+                  write(*,*) 'Begin loop over r'
                   STMP2 = 0.0_q
                   do NR = RNMAX, 1, -1
                     R = P(NT)%R%R(NR)
@@ -933,6 +944,7 @@
          ! synchronize the rn_loop
          CALLMPI( M_sum_d(GRIDC%COMM, SUM, INDMAX) )
 
+         write(*,*) 'Begin CWORK calc'
          do IND = 1, INDMAX
             ! when adding, only deal with local grid points
             if (LLOCAL(IND) > 0) then
@@ -940,6 +952,7 @@
             endif
          enddo
          ! FFT to reciprocal space
+         write(*,*) 'Transform to reciprocal space'
          CALL FFT_RC_SCALE(CWORK(1),CWORK2(1),GRIDC)
          CHTOT = CWORK2 + CHTOT
       enddo ion
@@ -1204,6 +1217,7 @@ end module mextpot
 
       RES = CVTOT(I)      !Add spin index
     END SUBROUTINE READ_ELEM_
+
 
 
 
