@@ -10,7 +10,7 @@
 
     type extpot
       logical :: lextpot, dextpot
-      integer :: nx, ny, nz ! should be equal to the dimension of potential grid
+      integer :: nx, ny, nz, sp ! should be equal to the dimension of potential grid
       real(q) :: FCORR
     endtype extpot
 
@@ -36,14 +36,12 @@
     end function EXTPT_DEXTPOT
 
     ! read INCAR FILE for external potential information
-    subroutine EXTPT_READER(WDES, NGXF,NGYF,NGZF,IU0,IU5,IU6)    !added WDES in main.F
+    subroutine EXTPT_READER(NGXF,NGYF,NGZF,IU0,IU5,IU6)    !added WDES in main.F
       use base
       use reader_tags
       use vaspxml
-      use wave
       implicit none
 
-      type (wavedes) WDES
       integer :: NGXF, NGYF, NGZF, IU0, IU5, IU6, IU_POT=99
       ! local variables
       integer :: ix, iy, iz, is, ntot
@@ -68,27 +66,32 @@
       endif
 
       if( EXTPT%lextpot ) then
+         write(6,*) 'Begin reading EXTPOT'
          open(unit=IU_POT,file='EXTPOT',status='old')
-         read(IU_POT,*) EXTPT%nx, EXTPT%ny, EXTPT%nz
+         write(6,*) 'File open'
+         read(IU_POT,*) EXTPT%nx, EXTPT%ny, EXTPT%nz, EXTPT%sp
+         write(6,*) '    NX,   NY,   NZ:', EXTPT%nx, EXTPT%ny, EXTPT%nz
+         write(6,*) 'Spin index:', EXTPT%sp
          ! check grid size consistency
          if ( EXTPT%nx /= NGXF .or. EXTPT%ny /= NGYF .or. EXTPT%nz /= NGZF ) then
             write(IU6,*) 'ERROR: external potential grid size mismatch:'
             write(IU6,*) '  NGXF, NGYF, NGZF:', NGXF, NGYF, NGZF
-            write(IU6,*) '    NX,   NY,   NZ:', EXTPT%nx, EXTPT%ny, EXTPT%nx
+            write(IU6,*) '    NX,   NY,   NZ:', EXTPT%nx, EXTPT%ny,EXTPT%nz
             write(IU0,*) 'ERROR: external potential grid size mismatch:'
             write(IU0,*) '  NGXF, NGYF, NGZF:', NGXF, NGYF, NGZF
-            write(IU0,*) '    NX,   NY,   NZ:', EXTPT%nx, EXTPT%ny, EXTPT%nx
+            write(IU0,*) '    NX,   NY,   NZ:', EXTPT%nx, EXTPT%ny,EXTPT%nz
             stop
          endif
-         allocate(EXTPT_GRID(EXTPT%nx, EXTPT%ny, EXTPT%nz, WDES%NCDIJ))    !Add spin index to the external potential
+         write(6,*) 'Allocating EXTPT_GRID'
+         allocate(EXTPT_GRID(EXTPT%nx, EXTPT%ny, EXTPT%nz, EXTPT%sp))    !Add spin index to the external potential
+         write(6,*) 'EXTPT_GRID shape', SHAPE(EXTPT_GRID)
          ! follow the tradition of CHGCAR format, ix be the fastest index
          read(IU_POT,*) ((((EXTPT_GRID(ix,iy,iz,is), ix=1,EXTPT%nx), &
-                                            iy=1,EXTPT%ny), iz=1,EXTPT%nz), is=1,WDES%NCDIJ))  !Include spin index for the external potential
+                                            iy=1,EXTPT%ny),iz=1,EXTPT%nz), is=1,EXTPT%sp)  !Include spin index for the external potential
          close(IU_POT)
-          write(6,*) 'EXTPT spin 1', EXTPT_GRID(ix,iy,iz,1)
-          write(6,*) 'EXTPT spin 2', EXTPT_GRID(ix,iy,iz,2)
       endif
-
+      write(6,*) 'EXTPT spin 1', EXTPT_GRID(1,1,1,1)
+      write(6,*) 'EXTPT spin 2', EXTPT_GRID(1,1,1,2)
       return
     end subroutine EXTPT_READER
 
